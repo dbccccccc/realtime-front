@@ -54,6 +54,7 @@
 </template>
 
 <script>
+import { ref } from "vue";
 import MessageBox from "./MessageBox.vue";
 import ToolBar from "./ToolBar.vue";
 import OperatorPanel from "./OperatorPanel.vue";
@@ -64,17 +65,16 @@ import {
   VAD_TYPE,
   CALL_MODE_TYPE,
   RESPONSE_TYPE,
+  ANSWER_STATUS, // 回答结果状态
+  MODEL_TIMBRE,
 } from "@/constants/modules/audioVideoCall";
 import {
   blobToBase64, // blob转base64
 } from "@/utils/stream";
-import {
-  ANSWER_STATUS, // 回答结果状态
-} from "@/constants/modules/audioVideoCall";
 import emitter from "@/utils/event";
 
 export default {
-  name: "Experience",
+  name: "AudioVideoCall",
   data() {
     return {
       apiKey: "", // api key
@@ -99,33 +99,10 @@ export default {
           tts_source: "e2e", // TTS源，三个枚举值zhipu、huoshan、e2e
           auto_search: false, // 是否打开内置的自动搜索(为 true,会在服务端内置搜索工具,无需上游传入) ,  仅在 audio 模式下生效
         },
+        voice: MODEL_TIMBRE.TONGTONG, // 模型音色
         output_audio_format: "mp3", // 音频输出格式，支持mp3、pcm
         input_audio_format: "wav", // 音频输入格式，支持wav；
-        tools: [
-          // {
-          //   type: 'function',
-          //   name: 'get_flight_number',
-          //   description: '根据始发地、目的地和日期，查询对应日期的航班号',
-          //   parameters: {
-          //     type: 'object',
-          //     properties: {
-          //       departure: {
-          //         description: '出发地',
-          //         type: 'string'
-          //       },
-          //       destination: {
-          //         description: '目的地',
-          //         type: 'string'
-          //       },
-          //       date: {
-          //         description: '日期',
-          //         type: 'string'
-          //       }
-          //     },
-          //     required: ['departure', 'destination', 'date']
-          //   }
-          // }
-        ],
+        tools: [],
       },
       vadType: VAD_TYPE.CLIENT_VAD, // VAD类型，server_vad:服务端VAD，client_vad:客户端VAD
       responseType: "", // 返回类型，text:文本，audio:音频
@@ -178,7 +155,7 @@ export default {
     openWS(mediaType = MEDIA_TYPE.AUDIO) {
       // 创建 SockJS 连接
       if (!this.apiKey) {
-        this.$message.error("请输入APIKEY！");
+        this.$message.warning("请输入APIKEY！");
         return;
       }
       if (this.sock && this.sock.readyState !== WebSocket.CLOSED) {
@@ -188,8 +165,10 @@ export default {
       this.isConnecting = true;
       this.isConnected = false;
 
-      const url = `wss://test.bigmodel.cn/stage-api/paas/v4/realtime?Authorization=${this.apiKey}`;
-      // const url = `wss://open.bigmodel.cn/api/paas/v4/realtime?Authorization=${this.apiKey}`;
+      const domain = ref(import.meta.env.VITE_APP_DOMAIN);
+      const proxyPath = ref(import.meta.env.VITE_APP_PROXY_PATH);
+      const url = `${domain.value}${proxyPath.value}/v4/realtime?Authorization=${this.apiKey}`;
+
       // 创建 WebSocket 连接
       this.sock = new WebSocket(url);
 

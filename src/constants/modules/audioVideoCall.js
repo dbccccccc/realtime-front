@@ -4,6 +4,11 @@ export const MEDIA_TYPE = {
   SCREEN: 'screen' // 屏幕共享
 }
 
+export const MODEL_TIMBRE = {
+  XIAOCHEN: 'xiaochen', // 小陈
+  TONGTONG: 'tongtong' // 彤彤
+}
+
 export const RESPONSE_TYPE = {
   AUDIO: 'audio', // 语音回复
   TEXT: 'text' // 文本回复

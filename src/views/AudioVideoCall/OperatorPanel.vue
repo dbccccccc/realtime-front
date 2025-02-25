@@ -131,6 +131,22 @@
           <el-radio :value="RESPONSE_TYPE.AUDIO">音频</el-radio>
           <el-radio :value="RESPONSE_TYPE.TEXT">文本</el-radio>
         </el-radio-group>
+        <el-select
+          class="mt10"
+          v-if="responseType === RESPONSE_TYPE.AUDIO"
+          v-model="panelParams.voice"
+          size="small"
+          placeholder="请选择"
+          :disabled="isConnected"
+        >
+          <el-option
+            v-for="item in voiceTypeArr"
+            :key="item.value"
+            :label="item.label"
+            :value="item.value"
+          >
+          </el-option>
+        </el-select>
       </el-form-item>
       <el-form-item label="模型工具" prop="tools">
         <ModelTools
@@ -144,11 +160,11 @@
 </template>
 
 <script>
-import SystemPrompt from "../components/SystemPrompt.vue";
-import VideoBox from "../components/VideoBox";
-import ModelTools from "../components/ModelParams/ModelTools.vue";
+import SystemPrompt from "@/components/SystemPrompt.vue";
+import VideoBox from "@/components/VideoBox";
+import ModelTools from "@/components/ModelParams/ModelTools.vue";
 import { TOOLS_TYPE } from "@/constants/modules/audioVideoCall";
-import { RESPONSE_TYPE } from "@/constants/modules/audioVideoCall";
+import { RESPONSE_TYPE, MODEL_TIMBRE } from "@/constants/modules/audioVideoCall";
 
 export default {
   name: "OperatorPanel",
@@ -187,9 +203,14 @@ export default {
   },
   data() {
     return {
-      apiKey: "0b74707979d44b6d205c90cd63129169.b9cjYrzp385vbHbX", // api key
+      apiKey: "", // api key
       RESPONSE_TYPE, // 响应类型
       showTools: [TOOLS_TYPE.WEB_SEARCH],
+      voiceTypeArr: [
+        // 返回音频的音色
+        { label: "男声", value: MODEL_TIMBRE.XIAOCHEN },
+        { label: "女声", value: MODEL_TIMBRE.TONGTONG },
+      ],
       modelId: "glm_realtime", // 模型id
       modelList: [
         // 模型列表
